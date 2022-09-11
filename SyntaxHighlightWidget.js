@@ -187,7 +187,20 @@ class HighlightCodeBlockWidget extends api.NoteContextAwareWidget {
                     log("dirtying inserted codeBlock " + JSON.stringify(codeBlock.toJSON()));
                     dirtyCodeBlocks.add(codeBlock);
                     
-                } else if (change.type == "remove" && (change.name == "codeBlock")) {
+                } else if((change.type == "insert") && (change.name == "table")){
+                    // When reopen the trilium, search  the codeBlock inside table 
+                    let nodes = []
+                    nodes.push.apply(nodes,change.position.nodeAfter._children._nodes)
+                    while(nodes.length!=0){
+                        let tmpNode = nodes.pop()
+                        if(tmpNode.name==="tableCell" | tmpNode.name==="tableRow"){
+                            nodes.push.apply(nodes,tmpNode._children._nodes)
+                        } else if(tmpNode.name==="codeBlock"){
+                            dirtyCodeBlocks.add(tmpNode);
+                        }
+                    }
+                } 
+                else if (change.type == "remove" && (change.name == "codeBlock")) {
                     // An existing codeblock was removed, do nothing. Note the
                     // node is no longer in the editor so the codeblock cannot
                     // be inspected here. No need to dirty the codeblock since
